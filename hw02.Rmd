@@ -1,0 +1,145 @@
+---
+title: "HW02"
+output: html_document
+date: "2025-01-27"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 1: Beauty, or not, in the classroom
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(dplyr)
+setwd("/Users/vineetburugu/Downloads")
+profs <- read.csv('profs.csv')
+# part a
+histogram_profs <- ggplot(profs, aes(x = eval)) + geom_histogram() + labs(title = "course evaluation scores", x = "course evaluation score", y = "frequency")
+histogram_profs
+```
+
+The distribution of course evaluation scores is skewed to the left, and the mode of the scores is around 4. In general, course evaluation scores are on the higher end of the spectrum.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# part b
+boxplot_profs <- ggplot(profs, aes(x = native, y = eval, fill = native)) + geom_boxplot() + labs(title = "course evaluation scores by native english speaker status", x = "native english speaker", y = "course evaluation score")
+boxplot_profs
+```
+
+The median course evaluation score for someone who is a native is higher at 4 compared to someone who is not a native being around 3.5. The natives have a higher spread in scores compared to the non-natives too.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# part c
+histogram_profs <- ggplot(profs, aes(x = eval, fill = gender)) + geom_histogram() + facet_wrap(~ gender, nrow = 2) + labs(title = "course evaluation scores by gender", x = "evaluation score", y = "frequency")
+histogram_profs
+```
+
+Males have higher course evaluation scores on average, and seem to have more scores in general. In addition, male course evaluation scores are skewed to the left.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# part d
+scatterplot_profs <- ggplot(profs, aes(x = beauty, y = eval)) + geom_point() + labs(title = "physical attractiveness vs course evaluation score", x = "physical attractiveness", y = "course evaluation score")
+scatterplot_profs
+```
+
+There is a slight positive coorelation in physical attractiveness and course evaluation scores, but for the most part the correlation isn't too strong. It might indicate a slight preference towards people with better looks.
+
+## Problem 2: bike sharing
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(dplyr)
+data <- read.csv('bikeshare.csv')
+# part a
+avg <- aggregate(total ~ hr, data = data, FUN = mean)
+plot1 <- ggplot(avg, aes(x = hr, y = total)) + geom_line() + labs(title = "average hourly bike rentals vs hour of day", x = "hour of day", y = "average hourly bike rentals")
+plot1
+```
+
+At the start of the day, the average hourly bike rentals starts out quite low, but by the 7th hour in the day, the average hourly bike rentals reaches a pretty high peak. It decreases a bit at the 10th hour, but increases to the peak at the 17th hour. It has decreased again at the 23rd hour. In general, the average hourly bike rentals peaks in the arly morning and in the evening.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# part b
+avg_workingday <- aggregate(total ~ hr + workingday, data = data, FUN = mean)
+plot2 <- ggplot(avg_workingday, aes(x = hr, y = total, color = factor(workingday))) + geom_line(size = 1) + facet_wrap(~ workingday) + labs(title = "average hourly bike rentals by hour faceted according to working day", x = "hour of day", y = "average bike rentals")
+plot2
+```
+
+If the day is not a working day, the average bike rentals peaks once around the 12th hour. On the other hand, when it is a working day, it because at around the 8th hour and the 17th hour. This is most likely happening because people have to go to work in the morning and come back in the evening.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# part c
+ridership <- data[data$hr == 9, ]
+ridership_avg <- aggregate(total ~ weathersit + workingday, data = ridership, FUN = mean)
+plot3 <- ggplot(ridership_avg, aes(x = factor(weathersit), y = total, fill = factor(workingday))) + geom_bar(stat = "identity", position = "dodge") + facet_wrap(~ workingday) + labs(title = "average ridership during the 9 AM Hour by weather situation code", x = "weather situation code", y = "average ridership")
+plot3
+```
+
+On working days, people pretty much ride the same amount no matter the weather outside, although the people bike less outside when the weather is very severe. On the other hand, when it isn't a work day, and the weather just gets worse and worse, the average ridership also decreases quite a bit. Generally people go on bikes irrespective of the weather on work days because they have to get to work.
+
+## Problem 3 - Capital Metro UT Ridership
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(dplyr)
+capmetro <- read.csv('capmetro_UT.csv')
+capmetro$day_of_week <- factor(capmetro$day_of_week, levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))
+capmetro$month <- factor(capmetro$month, levels = c("Sep", "Oct", "Nov"))
+# part 1
+boardings <- aggregate(boarding ~ hour_of_day + day_of_week + month, data = capmetro, FUN = mean)
+aboardings <- ggplot(boardings, aes(x = hour_of_day, y = boarding, color = month)) + geom_line() + facet_wrap(~ day_of_week) + labs(title = "average boardings by hour, day of week, and month", x = "hour of day", y = "average boardings")
+aboardings
+```
+
+In general, the hour of peak boarding does not change very much. There are slight differences but they are the same overall. On weekends, the peak boardings are non existent though. Average boarding on Mondays in September look lower, compared to other days and months because this is the start of semester, so people start to use the cap metro more and more. Average boarding on Weds/Thurs/Fri in November look lower because thanksgiving week means less people will be using the capmetro.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# part 2
+sboardings <- ggplot(capmetro, aes(x = temperature, y = boarding, color = factor(weekend))) + geom_point() + facet_wrap(~ hour_of_day) + labs(title = "boardings vs temperature by hour of day", x = "temperature", y = "boardings")
+sboardings
+```
+
+I general as the temperature increases, more people will board the bus, but the correlation is quite weak. This is because in general, people will use the board no matter the temeprature outside, because they have things to do. Weekdays generally entail more boardings though.
+
+## Problem 4: Wrangling the Billboard Top 100
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(dplyr)
+billboard <- read.csv('billboard.csv')
+# part a
+weeks <- aggregate(week_position ~ performer + song, data = billboard, FUN = length)
+colnames(weeks)[3] <- "count"
+weeks <- weeks[order(-weeks$count), ]  # Corrected variable name
+top <- head(weeks, 10)  # Corrected variable name
+top
+```
+
+Radioactive by Imagine Dragons has the highest count for total amount of weeks spent on the billboard, while Before he Cheats by Carrie Underwood has the lowest with 64 out of the ten.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# part b
+mdiversity <- billboard[billboard$year > 1958 & billboard$year < 2021, ]
+mdiversity <- aggregate(song ~ year, data = mdiversity, FUN = function(x) length(unique(x)))
+ldiversity <- ggplot(mdiversity, aes(x = year, y = song)) + geom_line() + labs(title = "musical diversity vs time", x = "year", y = "musical diversity") 
+ldiversity
+```
+
+Musical Diversity is very big in 1960, and decreases to its lowest in 2000 at just around 400, but later increases to a super big high in 2020. It's interesting that during the early 2000s, there was much less musical diversity, but now the modern era is trying to change that.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# part c
+weeks <- aggregate(week_position ~ performer + song, data = billboard, FUN = length)
+hits_10 <- weeks[weeks$week_position >= 10, ]  # Corrected variable name
+artist_hits <- aggregate(week_position ~ performer, data = hits_10, FUN = length)
+artist_hits <- artist_hits[artist_hits$week_position >= 30, ]
+artist_hits <- artist_hits[order(-artist_hits$week_position), ]
+bar_hits <- ggplot(artist_hits, aes(x = reorder(performer, -week_position), y = week_position)) + 
+  geom_bar(stat = "identity") + coord_flip() + 
+  labs(title = "artists with the most hits that were more than 10 weeks", x = "artist", y = "amount of hits more than 10 weeks")
+bar_hits
+```
+
+Elton John has the highest amount of hits for more than 10 weeks, and a lot of the other artists didn't really compete with him when it comes to that. In addition, Madonna comes in second. Many of the people on the lower end are much older artists.
